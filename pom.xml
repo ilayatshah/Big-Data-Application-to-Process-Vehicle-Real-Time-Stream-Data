@@ -1,0 +1,291 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>dlr.ts.reallabhh.diak</groupId>
+  <artifactId>FlinkKafkaConsumerVehicles</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>FlinkKafkaConsumerVehicles</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    
+   <maven.compiler.source>1.8</maven.compiler.source>
+
+    <maven.compiler.target>1.8</maven.compiler.target>
+     
+        
+        <!--  <geotools.version>26-SNAPSHOT</geotools.version> -->
+        
+    </properties>
+
+
+    
+  
+  
+  
+    <!-- <repository>
+      <id>boundless</id>
+      <name>Boundless</name>
+      <url>https://repo.boundlessgeo.com/main/</url>
+    
+   
+  <!-->
+  <!-- >  HELPPPPPPPPPPPPPPPPPPPPPPPPPPPPP start
+   
+If maven has trouble downloading any jar; you can try again by selecting Project ‣ Update All Maven Dependencies.
+
+If it really cannot connect you will need to switch to 2.7-SNAPSHOT and add the following snap shot repository.
+
+<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <geotools.version>2.7-SNAPSHOT</geotools.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net repository</name>
+            <url>http://download.java.net/maven/2</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>opengeo</id>
+            <name>OpenGeo Maven Repository</name>
+            <url>http://repo.opengeo.org</url>
+        </repository>
+    </repositories>
+    If the dependencies do not update automatically use Project ‣ Clean
+    HELPPPPPPPPPPP Finishedddddd
+    -->
+    
+
+     <repositories>   
+        <repository>
+      <id>osgeo</id>
+      <name>OSGeo</name>
+      <url>https://download.osgeo.org/webdav/geotools/</url>
+    </repository>
+    <repository>
+      <id>locationtechGeomesa</id>
+      <name>LocationtechGeoMesa</name>
+      <url>https://repo.locationtech.org/content/repositories/releases/</url>
+    </repository>
+    
+     
+  </repositories>
+
+  <dependencies>
+  
+  <!-- this depedency is for If your artifact is provided by the JDK's tools.jar, 
+  the system path would be defined as follows: So with out this dependency it is showing error, "Missing artifactID"
+  Here is the reference link: 
+  https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#System_Dependencies
+  https://stackoverflow.com/questions/29195269/in-the-pom-xml-for-a-java-project-i-get-missing-artifact-jdk-toolsjdk-toolsja/60560378#60560378
+  -->
+  <!--shan_sa <dependency> 
+<groupId>jdk.tools</groupId>
+<artifactId>jdk.tools</artifactId>
+<version>1.7.0_05</version>
+<scope>system</scope>
+<systemPath>C:/Program Files/AdoptOpenJDK/jdk-11.0.8.10-hotspot/lib/jrt-fs.jar</systemPath>
+</dependency> shan_sa-->
+  
+  <!-- 
+  <dependency>
+<groupId>jdk.tools</groupId>
+<artifactId>jdk.tools</artifactId>
+<version>11.0.8.10</version>
+<scope>system</scope>
+<systemPath>C:/Program Files/AdoptOpenJDK/jdk-11.0.8.10-hotspot/lib/tools.jar</systemPath>
+</dependency>
+ 
+   -->
+   
+ 
+  
+  <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.10.1</version>
+</dependency>
+  
+  
+  <dependency>
+	     <groupId>org.geotools</groupId>
+	     <artifactId>gt-main</artifactId>
+	     <version>21.1</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.geotools</groupId>
+	    <artifactId>gt-epsg-hsql</artifactId>
+	    <version>21.1</version>
+	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.locationtech.sfcurve</groupId>
+	    <artifactId>sfcurve-zorder_2.11</artifactId>
+	    <version>0.2.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.locationtech.geomesa</groupId>
+	    <artifactId>geomesa-hbase-datastore_2.11</artifactId>
+	    <version>2.4.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>commons-cli</groupId>
+	    <artifactId>commons-cli</artifactId>
+	    <version>1.4</version>
+	</dependency>		
+	
+	<!-- https://mvnrepository.com/artifact/org.json/json -->
+<dependency>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20190722</version>
+</dependency>
+	
+  
+  
+  <!-- These dependencies are used for Flink HBase connection and writing into Hbase  -->
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-hbase_2.12</artifactId>
+    <version>1.7.2</version>
+</dependency>
+<dependency>
+    	<groupId>org.apache.flink</groupId>
+    	<artifactId>flink-runtime_2.11</artifactId>
+    	<version>1.7.2</version>
+    </dependency>
+    <dependency>
+	    <groupId>org.apache.hbase</groupId>
+	    <artifactId>hbase-client</artifactId>
+	    <version>1.4.12</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.hbase</groupId>
+	    <artifactId>hbase-server</artifactId>
+	    <version>1.4.12</version>
+	</dependency>
+	<dependency>
+	     <groupId>org.apache.hbase</groupId>
+	     <artifactId>hbase</artifactId>
+	     <version>1.4.12</version>
+	     <type>pom</type>
+	</dependency>
+	
+	
+	
+  
+     
+    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+<dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.6</version>
+</dependency>
+  
+<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
+
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>1.7.30</version>
+    
+</dependency>
+  
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-java</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		
+<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-java -->
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-streaming-java_2.12</artifactId>
+    <version>1.7.2</version>
+    <scope>provided</scope>
+</dependency>
+
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-clients -->
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-clients_2.12</artifactId>
+    <version>1.7.2</version>
+</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka -->
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-connector-kafka_2.12</artifactId>
+    <version>1.7.2</version>
+</dependency>
+		
+  
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    
+       
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>dlr.ts.reallabhh.diak.FlinkKafkaConsumerVehicles.FlinkKafkaConsumerVehicles</mainClass>
+            </transformer>
+          </transformers>
+          <filters>
+	        <filter>
+	          <artifact>*:*</artifact>
+	          <excludes>
+	        	<exclude>javax/xml/**</exclude>
+	        	<exclude>org/apache/xerces/**</exclude>
+	        	<exclude>org/w3c/**</exclude>
+	        	<exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+	          </excludes>
+	        </filter>
+	      </filters>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+ 
+</project>
