@@ -40,7 +40,7 @@ public class FlinkKafkaConsumerVehicles {
 	public static void main(String[] args) throws Exception {
 
 		// fetch runtime arguments
-		String bootstrapServers = "10.21.129.123:9092";
+		String bootstrapServers = "your bootstrap server address";
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		// Set up the Consumer and create a datastream from this source
