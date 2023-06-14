@@ -40,9 +40,7 @@ public class FlinkKafkaConsumerVehicles {
 	public static void main(String[] args) throws Exception {
 
 		// fetch runtime arguments
-		// ParameterTool params = ParameterTool.fromArgs(args);
 		String bootstrapServers = "10.21.129.123:9092";
-
 		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
 		// Set up the Consumer and create a datastream from this source
@@ -65,8 +63,6 @@ public class FlinkKafkaConsumerVehicles {
 			private long numberOfMessagesProcessed;
 			private long numberOfMessagesFailed;
 			private long numberOfMessagesSkipped;
-			// long lastUpdatedTime;
-			//Connection connection; //shan_sa: this object is unused
 
 			// Define the variables for both the Live and History tables in which the data
 			// will be store in the HBase
@@ -92,7 +88,7 @@ public class FlinkKafkaConsumerVehicles {
 				Map<String, Serializable> params_live = new HashMap<>();
 				params_live.put("hbase.catalog", "diak:vehicles_live"); // HBase table name
 				params_live.put("hbase.zookeepers",
-						"ts-bd-hadoop-hbase-01-ba.intra.dlr.de:2181,ts-bd-hadoop-hbase-02-ba.intra.dlr.de:2181");
+						"ts-dlr-bs,ts-ts-dlr-bs"); // address of the hbase zookeeper (dummy here)
 
 				try {
 					vehicles_live = DataStoreFinder.getDataStore(params_live);
@@ -113,14 +109,15 @@ public class FlinkKafkaConsumerVehicles {
 				attributes.append("vehicleType:String,");
 				attributes.append("speed:Double,");
 				attributes.append("*vehiclePosition:Point:srid=4326");
-// a table template will be created with the name, "diak:vehicles_live_table", in which all the above columns will be added
+				// a table template will be created with the name, "diak:vehicles_live_table", 
+				// in which all the above columns will be added
 				sft_live = SimpleFeatureTypes.createType("diak_vehicles_live", attributes.toString());
 
 				// define connection parameters to diak:vehicles_history GeoMesa-HBase DataStore
 				Map<String, Serializable> params_his = new HashMap<>();
 				params_his.put("hbase.catalog", "diak:vehicles_history"); // HBase table name
 				params_his.put("hbase.zookeepers",
-						"ts-bd-hadoop-hbase-01-ba.intra.dlr.de:2181,ts-bd-hadoop-hbase-02-ba.intra.dlr.de:2181");
+						"ts-dlr-bs,ts-ts-dlr-bs"); // address of the hbase zookeeper (dummy here)
 
 				try {
 					vehicles_history = DataStoreFinder.getDataStore(params_his);
@@ -155,12 +152,12 @@ public class FlinkKafkaConsumerVehicles {
 					e.printStackTrace();
 				}
 
-//initialise variables
+				//initialise variables
 				numberOfMessagesProcessed = 0;
 				numberOfMessagesFailed = 0;
 				numberOfMessagesSkipped = 0;
 
-//for Vehicles_Live
+				//for Vehicles_Live
 				vehicles_live_features = new ArrayList<>();
 				SFbuilderLive = new SimpleFeatureBuilder(sft_live);
 
@@ -194,12 +191,9 @@ public class FlinkKafkaConsumerVehicles {
 						String vehicleID = splitObj[1] + splitObj[2]; // at index 2 (1) we have vehicle id
 						String vehicleType = splitObj[0]; // at index 1 (0) we have vehicle type
 
-						//shan_sa: phenomenonTime = resultTime for messages from simulation
-						String timestamp_ISO = json_obj.getString("resultTime"); // convert ISO datetime string into unixtime/epochseconds
-						// parse string (timestamp) to `LocalDateTime`
-						// String timestamp = LocalDateTime.parse(timestamp_ISO).toEpochSecond(new
-						// ZoneOffset());
-						// String timestamp = null;
+						//phenomenonTime = resultTime for messages from simulation
+						// convert ISO datetime string into unixtime/epochseconds
+						String timestamp_ISO = json_obj.getString("resultTime");
 						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 						Date dt = sdf.parse(timestamp_ISO);
 						long timestamp = dt.getTime() / 1000;
@@ -209,11 +203,6 @@ public class FlinkKafkaConsumerVehicles {
 						JSONArray coordJson = speedList.getJSONObject(0).getJSONObject("result")
 								.getJSONArray("coordinates");
 						String pointWKT = "POINT(" + coordJson.getFloat(0) + " " + coordJson.getFloat(1) + ")";
-						// String vehiclePosition = json_obj.getString(vehiclePosition);
-
-						// diak:vehicle_history table entry, geotools approach
-						// String rowidHist =
-						// flinkConsumer.toString().split("@")[1]+"_"+String.valueOf(System.nanoTime());
 
 						// create and add feature to the vehicle history SFbuilder
 						SFbuilderHist.set("vehicleID", vehicleID);
@@ -242,19 +231,12 @@ public class FlinkKafkaConsumerVehicles {
 							e.printStackTrace();
 						}
 
-						// diak:vehicle_live table entry, geotools approach
-						// String rowidLive =
-						// flinkConsumer.toString().split("@")[1]+"_"+String.valueOf(System.nanoTime());
-
 						// delete row if already present in table
 						FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 						Filter filter = ff.id(Collections.singleton(ff.featureId(vehicleID)));
 						SimpleFeatureStore featurestore_live = (SimpleFeatureStore) vehicles_live
 								.getFeatureSource("diak_vehicles_live");
 						featurestore_live.removeFeatures(filter);
-
-						// String filterString = "...";
-						// Filter filter = CQL.toFilter(filterString);
 
 						// create and add feature to the vehicle live SFbuilder
 						SFbuilderLive.set("vehicleType", vehicleType);
@@ -304,42 +286,6 @@ public class FlinkKafkaConsumerVehicles {
 				System.out.println("In close function!");
 				// this function runs when the flink job stops/is stopped
 
-				// save the remaining records of the diak:vehicles_history table
-				//shan_sa
-				/*vehicles_history_features = Collections.unmodifiableList(vehicles_history_features);
-				try (FeatureWriter<SimpleFeatureType, SimpleFeature> writer = vehicles_history
-						.getFeatureWriterAppend(sft_history.getTypeName(), Transaction.AUTO_COMMIT)) {
-					System.out.println(
-							"Writing " + vehicles_history_features.size() + " features to diak:vehicles_history");
-					for (SimpleFeature feature : vehicles_history_features) {
-						SimpleFeature toWrite = writer.next();
-						toWrite.setAttributes(feature.getAttributes());
-						((FeatureIdImpl) toWrite.getIdentifier()).setID(feature.getID());
-						toWrite.getUserData().put(Hints.USE_PROVIDED_FID, Boolean.TRUE);
-						toWrite.getUserData().putAll(feature.getUserData());
-						writer.write();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				// save the remaining records of the diak:vehicles_history table
-				vehicles_live_features = Collections.unmodifiableList(vehicles_live_features);
-				try (FeatureWriter<SimpleFeatureType, SimpleFeature> writer = vehicles_live
-						.getFeatureWriterAppend(sft_live.getTypeName(), Transaction.AUTO_COMMIT)) {
-					System.out.println("Writing " + vehicles_live_features.size() + " features to diak:vehicles_live");
-					for (SimpleFeature feature : vehicles_live_features) {
-						SimpleFeature toWrite = writer.next();
-						toWrite.setAttributes(feature.getAttributes());
-						((FeatureIdImpl) toWrite.getIdentifier()).setID(feature.getID());
-						toWrite.getUserData().put(Hints.USE_PROVIDED_FID, Boolean.TRUE);
-						toWrite.getUserData().putAll(feature.getUserData());
-						writer.write();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}*/ //shan_sa
-
 				// close datastore and connection
 				if (vehicles_live != null)
 					vehicles_live.dispose();
@@ -355,7 +301,6 @@ public class FlinkKafkaConsumerVehicles {
 				System.out
 						.println(flinkConsumer.toString() + " Number of messages skipped: " + numberOfMessagesSkipped);
 
-				// return " ";
 			}
 
 		});
